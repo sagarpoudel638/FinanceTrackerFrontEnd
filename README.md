@@ -20,3 +20,25 @@ This is the frontend repository for the [Project Name] application. It provides 
 ### Prerequisites
 
 - **Node.js** and **Yarn** should be installed.
+### Installation
+
+1. Clone the repository:
+   `git clone <repository-url>`
+2. Navigate to the frontend directory and install dependencies:
+`cd frontend`
+`yarn install`
+
+## Running the Application
+To start the development server:
+`yarn start`
+
+This will start the application at http://localhost:3000 (default for most setups).
+##Building for Production
+To create an optimized build:
+`yarn build`
+
+##Contributing
+Please refer to the CONTRIBUTING.md file for guidelines on how to contribute.
+
+##License
+Distributed under the MIT License. See LICENSE for more information.
