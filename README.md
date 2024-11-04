@@ -33,12 +33,12 @@ To start the development server:
 `yarn start`
 
 This will start the application at http://localhost:3000 (default for most setups).
-##Building for Production
+## Building for Production
 To create an optimized build:
 `yarn build`
 
 ##Contributing
 Please refer to the CONTRIBUTING.md file for guidelines on how to contribute.
 
-##License
+## License
 Distributed under the MIT License. See LICENSE for more information.
