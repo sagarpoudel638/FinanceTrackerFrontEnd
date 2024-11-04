@@ -1,6 +1,6 @@
 # Project Frontend
 
-This is the frontend repository for the [Project Name] application. It provides the user interface for interacting with the application's backend, where users can view and manage various features.
+This is the frontend repository for the Finance Tracker application. It provides the user interface for interacting with the application's backend, where users can view and manage various features.
 
 ## Tech Stack
 
