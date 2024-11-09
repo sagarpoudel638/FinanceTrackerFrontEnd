@@ -8,6 +8,8 @@ import Login from "./pages/Login.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import { ToastContainer, toast } from 'react-toastify';
 import { useAuth } from "./utils/AuthContext.jsx";
+import Transactions from "./pages/Transactions.jsx";
+import ProductsDemo from "./pages/TestPage.jsx";
 
 function App() {
   const { globalMessage, setGlobalMessage } = useAuth();
@@ -24,6 +26,9 @@ function App() {
         <Route path="signup" element={<Signup />} />
         <Route path="login" element={<Login />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="transactions" element={<Transactions />} />
+        <Route path="test" element={<ProductsDemo />} />
+
         </Route>
       </Routes>
       <ToastContainer/>

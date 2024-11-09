@@ -2,6 +2,7 @@ import axios from "axios";
 
 const rootAPI = import.meta.env.VITE_API_URL;
 const authEP = rootAPI + "/auth";
+const transactionEP = rootAPI + "/transactions";
 
 const apiProcessor = async ({ method, url, data, headers }) => {
   try {
@@ -35,5 +36,15 @@ export const userLogin = async (loginInfo) => {
     url: `${authEP}/login`,
     data: loginInfo,
   };
+  return await apiProcessor(obj);
+};
+
+export const getTransactions = async () => {
+  const obj = { method: "get", url: transactionEP };
+  return await apiProcessor(obj);
+};
+
+export const deleteTransaction = async (_id) => {
+  const obj = { method: "delete", url: transactionEP +"/"+ _id };
   return await apiProcessor(obj);
 };

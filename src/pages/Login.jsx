@@ -29,9 +29,6 @@ export default function Login() {
       await login(formData);
       toast.success("login in successful!");
       navigate("/dashboard");
-
-    
-  
   };
 
   const handleOnchange = (e)=>{
