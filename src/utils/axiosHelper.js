@@ -48,3 +48,10 @@ export const deleteTransaction = async (_id) => {
   const obj = { method: "delete", url: transactionEP +"/"+ _id };
   return await apiProcessor(obj);
 };
+
+export const createTransaction = async (transactionData)=>{
+const obj = {method: "post",
+  url: `${transactionEP}/transaction`,
+  data: transactionData,}
+  return await apiProcessor(obj);
+}

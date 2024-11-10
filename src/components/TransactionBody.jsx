@@ -11,7 +11,7 @@ export const TransactionBody = ({transaction, index, selectAllChecked, onSelectC
 
   return (
     
-    <MDBTableBody>
+    
         <tr>
           <th scope="col">
           <MDBCheckbox checked={selectAllChecked} onChange={onSelectChange} />
@@ -27,6 +27,6 @@ export const TransactionBody = ({transaction, index, selectAllChecked, onSelectC
             <MDBBtn color="danger" onClick= {()=>deleteFunction(transaction._id)} ><MDBIcon fas icon="trash" /></MDBBtn>
           </td>
         </tr>
-      </MDBTableBody>
+      
   )
 }
