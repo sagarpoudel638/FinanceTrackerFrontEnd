@@ -90,37 +90,66 @@ export default function Transactions() {
   const handleModalClose = () => setModalShow(false);
   // Creating Transaction
   const [transactionData, setTransactionData] = useState({
-    title: "",
-    income: "",
+    // title: "",
+    // income: "",
+    type:"income",
     expenses: "",
     createdAt: "",
   });
 
+  // const handleOnChange = (e) => {
+  //   const { name, value } = e.target;
+  //   if (name === "type") {
+  //     setTransactionData((prevData) => ({
+  //       ...prevData,
+  //       type: value, 
+  //       income: value === "income" ? prevData.amount : "",
+  //       expenses: value === "expenses" ? prevData.amount : "",
+  //     }));
+  //   } else if (name === "amount") {
+  //     setTransactionData((prevData) => ({
+  //       ...prevData,
+  //       amount: value,
+  //       income: prevData.type === "income" ? value : "",
+  //       expenses: prevData.type === "expenses" ? value : "",
+  //     }));
+  //   } else {
+  //     setTransactionData((prevData) => ({
+  //       ...prevData,
+  //       [name]: value,
+  //     }));
+  //   }
+  //   console.log(transactionData)
+  // };
   const handleOnChange = (e) => {
     const { name, value } = e.target;
-    if (name === "type") {
-      setTransactionData((prevData) => ({
-        ...prevData,
-        type: value, // Update the type
-        income: value === "income" ? prevData.amount : "",
-        expenses: value === "expenses" ? prevData.amount : "",
-      }));
-    } else if (name === "amount") {
-      setTransactionData((prevData) => ({
-        ...prevData,
-        amount: value,
-        income: prevData.type === "income" ? value : "",
-        expenses: prevData.type === "expenses" ? value : "",
-      }));
-    } else {
-      setTransactionData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
-    }
+  
+    setTransactionData((prevData) => {
+      let updatedData = { ...prevData, [name]: value };
+  
+      if (name === "type") {
+        if (value === "income") {
+          updatedData.income = prevData.amount; // set the current amount as income
+          updatedData.expenses = ""; // clear expenses when type is income
+        } else if (value === "expenses") {
+          updatedData.expenses = prevData.amount; // set the current amount as expenses
+          updatedData.income = ""; // clear income when type is expenses
+        }
+      } else if (name === "amount") {
+        if (prevData.type === "income") {
+          updatedData.income = value; // set amount to income if type is income
+        } else if (prevData.type === "expenses") {
+          updatedData.expenses = value; // set amount to expenses if type is expenses
+        }
+      }
+  
+      return updatedData;
+    });
+  
+    // Use a useEffect hook to watch for changes in transactionData if needed
+    console.log(transactionData);
   };
-
-  const handleAddtransaction = async () => {
+  const handleOnsubmit = async (e) => {
     try {
       const response = await createTransaction(transactionData);
       if (response.status == "success") {
@@ -151,11 +180,12 @@ export default function Transactions() {
   //   return { totalIncome, totalExpenses, netStatus };
   // };
 
-  useEffect(() => {
-    fillTable();
-  }, [transactionData]);
+  
 
   const totals = calculateTotals();
+  useEffect(() => {
+    fillTable();
+  }, [transactionData,totals]);
   return (
     <>
       &nbsp;
@@ -225,6 +255,9 @@ export default function Transactions() {
           </tr>
         </MDBTableBody>
       </MDBTable>
+      <Form onSubmit={(e)=>{e.preventDefault();
+        handleOnsubmit();
+      }}>
       <Modal
         show={modalShow}
         onHide={handleModalClose}
@@ -274,11 +307,12 @@ export default function Transactions() {
           <MDBBtn color="danger" onClick={handleModalClose}>
             Close
           </MDBBtn>
-          <MDBBtn color="success" onClick={handleAddtransaction}>
+          <MDBBtn color="success" type="submit">
             Add
           </MDBBtn>
         </Modal.Footer>
       </Modal>
+      </Form>
     </>
   );
 }
