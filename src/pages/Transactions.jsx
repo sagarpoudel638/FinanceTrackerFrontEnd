@@ -31,15 +31,18 @@ export default function Transactions() {
     try {
       const response = await getTransactions();
       if (response?.status === "error") {
-        setTransactions([]);
+        setTransactions({type: "income",
+          title: "",
+          amount: "",
+          createdAt: "",});
         throw new Error(response.message);
       } else {
-        console.log(response.data);
+        //console.log(response.data);
         setTransactions(response.data); 
       }
     } catch (error) {
       //setError(error.message);
-      setTransactions([]);
+      setTransactions({});
     }
   };
 
@@ -90,37 +93,24 @@ export default function Transactions() {
   const handleModalClose = () => setModalShow(false);
   // Creating Transaction
   const [transactionData, setTransactionData] = useState({
-    // title: "",
-    // income: "",
-    type:"income",
+    title: "",
+    income: "",
     expenses: "",
+    type:"",
     createdAt: "",
   });
 
   // const handleOnChange = (e) => {
   //   const { name, value } = e.target;
-  //   if (name === "type") {
-  //     setTransactionData((prevData) => ({
-  //       ...prevData,
-  //       type: value, 
-  //       income: value === "income" ? prevData.amount : "",
-  //       expenses: value === "expenses" ? prevData.amount : "",
-  //     }));
-  //   } else if (name === "amount") {
-  //     setTransactionData((prevData) => ({
-  //       ...prevData,
-  //       amount: value,
-  //       income: prevData.type === "income" ? value : "",
-  //       expenses: prevData.type === "expenses" ? value : "",
-  //     }));
-  //   } else {
-  //     setTransactionData((prevData) => ({
-  //       ...prevData,
-  //       [name]: value,
-  //     }));
-  //   }
-  //   console.log(transactionData)
+    
+  //   setTransactionData((prevData) => ({
+  //     ...prevData,
+  //     [name]: value,
+  //   }));
+    
+  //   console.log({ ...transactionData, [name]: value });
   // };
+
   const handleOnChange = (e) => {
     const { name, value } = e.target;
   
@@ -129,29 +119,31 @@ export default function Transactions() {
   
       if (name === "type") {
         if (value === "income") {
-          updatedData.income = prevData.amount; // set the current amount as income
-          updatedData.expenses = ""; // clear expenses when type is income
+          updatedData.income = prevData.amount || "0"; 
+          updatedData.expenses = "0"; 
         } else if (value === "expenses") {
-          updatedData.expenses = prevData.amount; // set the current amount as expenses
-          updatedData.income = ""; // clear income when type is expenses
+          updatedData.expenses = prevData.amount || "0"; 
+          updatedData.income = "0"; 
         }
       } else if (name === "amount") {
         if (prevData.type === "income") {
-          updatedData.income = value; // set amount to income if type is income
+          updatedData.income = value; 
+          updatedData.expenses = "0"; 
         } else if (prevData.type === "expenses") {
-          updatedData.expenses = value; // set amount to expenses if type is expenses
+          updatedData.expenses = value; 
+          updatedData.income = "0";
         }
       }
   
       return updatedData;
     });
   
-    // Use a useEffect hook to watch for changes in transactionData if needed
     console.log(transactionData);
   };
   const handleOnsubmit = async (e) => {
     try {
       const response = await createTransaction(transactionData);
+      console.log(response.status)
       if (response.status == "success") {
         navigate("/transactions");
         handleModalClose();
@@ -185,7 +177,7 @@ export default function Transactions() {
   const totals = calculateTotals();
   useEffect(() => {
     fillTable();
-  }, [transactionData,totals]);
+  }, []);
   return (
     <>
       &nbsp;
@@ -255,8 +247,10 @@ export default function Transactions() {
           </tr>
         </MDBTableBody>
       </MDBTable>
-      <Form onSubmit={(e)=>{e.preventDefault();
+      <Form  id = "form1" onSubmit={(e)=>{e.preventDefault();
         handleOnsubmit();
+        handleModalClose();
+
       }}>
       <Modal
         show={modalShow}
@@ -307,7 +301,7 @@ export default function Transactions() {
           <MDBBtn color="danger" onClick={handleModalClose}>
             Close
           </MDBBtn>
-          <MDBBtn color="success" type="submit">
+          <MDBBtn color="success" type="submit" form="form1">
             Add
           </MDBBtn>
         </Modal.Footer>
