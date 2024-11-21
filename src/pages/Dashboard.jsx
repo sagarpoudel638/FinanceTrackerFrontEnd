@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { Doughnut } from "react-chartjs-2";
+import React, { useEffect, useState } from "react";
 import { getTransactions } from "../utils/axiosHelper";
 import { calculateTotals } from "../utils/helper";
 import { Bar,Pie } from 'react-chartjs-2';
@@ -8,8 +7,27 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 
 
 const Dashboard = () => {
-
-  const totals = calculateTotals();
+  
+ const [transactions, setTransactions]= useState([]);
+const fillDashboard = async ()=>{
+  try {
+    const response = await getTransactions();
+    if (response?.status === "error") {
+      setTransactions({type: "",
+        title: "",
+        amount: "",
+        createdAt: "",});
+      throw new Error(response.message);
+    } else {
+      //console.log(response.data);
+      setTransactions(response.data); 
+    }
+  } catch (error) {
+    //setError(error.message);
+    setTransactions({});
+  }
+}
+  const totals = calculateTotals(transactions);
   const data = {
     labels: ["Income", "Expenses"],
     datasets: [
@@ -44,6 +62,10 @@ const Dashboard = () => {
       },
     },
   };
+
+  useEffect(() => {
+    fillDashboard();
+  }, []);
   return (
     <>
       <h2>Transaction Overview</h2>

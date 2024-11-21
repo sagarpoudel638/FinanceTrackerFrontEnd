@@ -157,7 +157,7 @@ export default function Transactions() {
       );
     }
   };
-  // // Calulating income, expenses and net status
+ //Calulating income, expenses and net status
   // const calculateTotals = () => {
   //   const totalIncome = transactions.reduce(
   //     (sum, transaction) => sum + (parseFloat(transaction.income) || 0),
@@ -172,9 +172,9 @@ export default function Transactions() {
   //   return { totalIncome, totalExpenses, netStatus };
   // };
 
-  
+ 
 
-  const totals = calculateTotals();
+ const totals = calculateTotals(transactions);
   useEffect(() => {
     fillTable();
   }, []);
