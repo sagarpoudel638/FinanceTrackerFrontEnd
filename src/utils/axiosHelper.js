@@ -4,6 +4,32 @@ const rootAPI = import.meta.env.VITE_API_URL;
 const authEP = rootAPI + "/auth";
 const transactionEP = rootAPI + "/transactions";
 
+export const getJWTtoken = () => {
+  const token = localStorage.getItem("accessJWT");
+  return token;
+};
+
+export const setJWTtoken = (token) => {
+  localStorage.setItem("accessJWT", token);
+};
+
+export const removeJWTtoken = () => {
+  localStorage.removeItem("accessJWT");
+};
+export const verifyToken = async () => {
+  let token = getJWTtoken();
+
+  const obj = {
+    method: "get",
+    url: authEP + "/verify",
+    headers: {
+      Authorization: "Bearer " + token,
+    },
+  };
+
+  return await apiProcessor(obj);
+};
+
 const apiProcessor = async ({ method, url, data, headers }) => {
   try {
     const response = await axios({
@@ -40,18 +66,38 @@ export const userLogin = async (loginInfo) => {
 };
 
 export const getTransactions = async () => {
-  const obj = { method: "get", url: transactionEP };
+  let token = getJWTtoken();
+  const obj = {
+    method: "get",
+    url: transactionEP,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   return await apiProcessor(obj);
 };
 
 export const deleteTransaction = async (_id) => {
-  const obj = { method: "delete", url: transactionEP +"/"+ _id };
+  let token = getJWTtoken();
+  const obj = {
+    method: "delete",
+    url: transactionEP + "/" + _id,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   return await apiProcessor(obj);
 };
 
-export const createTransaction = async (transactionData)=>{
-const obj = {method: "post",
-  url: `${transactionEP}/transaction`,
-  data: transactionData,}
+export const createTransaction = async (transactionData) => {
+  let token = getJWTtoken();
+  const obj = {
+    method: "post",
+    url: `${transactionEP}/transaction`,
+    data: transactionData,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   return await apiProcessor(obj);
-}
+};
