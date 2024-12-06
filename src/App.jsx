@@ -12,7 +12,10 @@ import Transactions from "./pages/Transactions.jsx";
 import ProductsDemo from "./pages/TestPage.jsx";
 
 function App() {
-  const { globalMessage, setGlobalMessage } = useAuth();
+  const { autoLogin, globalMessage, setGlobalMessage } = useAuth();
+  useEffect(() => {
+    autoLogin().catch(err => console.error("Autologin failed:", err));
+  }, []);
   useEffect(() => {
     if (globalMessage) {
       toast(globalMessage);

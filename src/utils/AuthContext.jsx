@@ -29,7 +29,8 @@ export const AuthProvider = ({ children }) => {
   const autoLogin = async () => {
     const response = await verifyToken();
     if (response.status == "success") {
-      setUser(response.data.username);
+      setUser(response.data.user);
+      console.log(response.data.user)
     }
   };
   const logout = () => {
@@ -39,10 +40,11 @@ export const AuthProvider = ({ children }) => {
   const login = async (loginInfo) => {
     try {
       const response = await userLogin(loginInfo);
-      console.log(response);
+      console.log(response.data);
       const { user, token } = response.data;
       setJWTtoken(token);
       setUser(user);
+      
     } catch (error) {
       console.log(`Login in failed :${error}`);
       throw new Error("login in  failed. Please check your credentials.");
