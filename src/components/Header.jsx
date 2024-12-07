@@ -8,9 +8,10 @@ import NavDropdown from "react-bootstrap/NavDropdown";
 import { faBuildingColumns } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChartLine } from "@fortawesome/free-solid-svg-icons/faChartLine";
+
 const Header = () => {
   // const user = false
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   return (
     <Navbar className="bg-body-tertiary">
       <Container>
@@ -36,7 +37,7 @@ const Header = () => {
                   Settings
                 </NavDropdown.Item>
                 <NavDropdown.Divider />
-                <NavDropdown.Item href="#logout">Log Out</NavDropdown.Item>
+                <NavDropdown.Item onClick={logout}>Log Out</NavDropdown.Item>
               </NavDropdown>
             </>
           ) : (

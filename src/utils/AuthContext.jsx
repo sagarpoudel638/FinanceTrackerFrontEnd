@@ -7,13 +7,16 @@ import {
   getJWTtoken,
   verifyToken,
 } from "./axiosHelper";
+import {  useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
+
 export const AuthProvider = ({ children }) => {
   const [globalMessage, setGlobalMessage] = useState("");
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
   const signup = async (signupInfo) => {
     try {
       const response = await userSignup(signupInfo);
@@ -36,6 +39,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     removeJWTtoken();
     setUser(null);
+    navigate("/login");
   };
   const login = async (loginInfo) => {
     try {

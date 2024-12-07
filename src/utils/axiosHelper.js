@@ -77,6 +77,18 @@ export const getTransactions = async () => {
   return await apiProcessor(obj);
 };
 
+export const getTransactionsByID = async (_id) => {
+  let token = getJWTtoken();
+  const obj = {
+    method: "post",
+    url: transactionEP + "/" + _id,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  return await apiProcessor(obj);
+}
+
 export const deleteTransaction = async (_id) => {
   let token = getJWTtoken();
   const obj = {
@@ -101,3 +113,16 @@ export const createTransaction = async (transactionData) => {
   };
   return await apiProcessor(obj);
 };
+
+export const updateTransaction = async (id, transactionData)=>{
+  let token = getJWTtoken();
+  const obj = {
+    method: "patch",
+    url:`${transactionEP}/${id}`,
+    data: transactionData,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+  return await apiProcessor(obj);
+}

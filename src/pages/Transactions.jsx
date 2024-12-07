@@ -8,7 +8,7 @@ import {
   MDBIcon,
   MDBTableBody,
 } from "mdb-react-ui-kit";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
 import { TransactionBody } from "../components/TransactionBody";
@@ -16,10 +16,12 @@ import {
   getTransactions,
   deleteTransaction,
   createTransaction,
+  updateTransaction,
 } from "../utils/axiosHelper";
 import { toast } from "react-toastify";
 import { Container } from "react-bootstrap";
 import { calculateTotals } from "../utils/helper";
+import { getTransactionbyID } from "../../../FinanceTrackerBackEnd/src/models/transactionsSchema";
 
 export default function Transactions() {
   const navigate = useNavigate();
@@ -27,18 +29,25 @@ export default function Transactions() {
   const [transactions, setTransactions] = useState([]);
   const [selectAllChecked, setSelectAllChecked] = useState(false);
   const [selectedTransactions, setSelectedTransactions] = useState(new Set());
+  // const location = useLocation();
+  // const queryParams = new URLSearchParams(location.search);
+  // const tid = queryParams.get("id");
+  const [tid, setTid] = useState();
+
   const fillTable = async () => {
     try {
       const response = await getTransactions();
       if (response?.status === "error") {
-        setTransactions({type: "income",
+        setTransactions({
+          type: "income",
           title: "",
           amount: "",
-          createdAt: "",});
+          createdAt: "",
+        });
         throw new Error(response.message);
       } else {
         //console.log(response.data);
-        setTransactions(response.data); 
+        setTransactions(response.data);
       }
     } catch (error) {
       //setError(error.message);
@@ -96,54 +105,86 @@ export default function Transactions() {
     title: "",
     income: "",
     expenses: "",
-    type:"",
+    type: "",
     createdAt: "",
   });
+  const fillFormData = async (transactionID) => {
+    const response = await getTransactionbyID(transactionID);
+
+    if (response.status == "success") {
+      console.log(response.data);
+      setTransactionData({
+        title: response.data.title,
+        income: "",
+        expenses: "",
+        type: "",
+        createdAt: "",
+      });
+    } else {
+      console.log("ERROR fetching Transaction data");
+    }
+  };
+  const totals = calculateTotals(transactions);
+
+
+  const editFunction = (transactionid) => {
+    setModalShow(true);
+    fillFormData(tid);
+    setTid(transactionid);
+
+  };
 
   // const handleOnChange = (e) => {
   //   const { name, value } = e.target;
-    
+
   //   setTransactionData((prevData) => ({
   //     ...prevData,
   //     [name]: value,
   //   }));
-    
+
   //   console.log({ ...transactionData, [name]: value });
   // };
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
-  
+
     setTransactionData((prevData) => {
       let updatedData = { ...prevData, [name]: value };
-  
+
       if (name === "type") {
         if (value === "income") {
-          updatedData.income = prevData.amount || "0"; 
-          updatedData.expenses = "0"; 
+          updatedData.income = prevData.amount || "0";
+          updatedData.expenses = "0";
         } else if (value === "expenses") {
-          updatedData.expenses = prevData.amount || "0"; 
-          updatedData.income = "0"; 
+          updatedData.expenses = prevData.amount || "0";
+          updatedData.income = "0";
         }
       } else if (name === "amount") {
         if (prevData.type === "income") {
-          updatedData.income = value; 
-          updatedData.expenses = "0"; 
+          updatedData.income = value;
+          updatedData.expenses = "0";
         } else if (prevData.type === "expenses") {
-          updatedData.expenses = value; 
+          updatedData.expenses = value;
           updatedData.income = "0";
         }
       }
-  
+
       return updatedData;
     });
-  
+
     console.log(transactionData);
   };
   const handleOnsubmit = async (e) => {
+    
+    let response;
     try {
-      const response = await createTransaction(transactionData);
-      console.log(response.status)
+      if (tid) {
+        response = await updateTransaction(tid, transactionData);
+      } else {
+        response = await createTransaction(transactionData);
+      }
+
+      console.log(response.status);
       if (response.status == "success") {
         navigate("/transactions");
         handleModalClose();
@@ -151,33 +192,44 @@ export default function Transactions() {
         toast.success(response.message);
       }
     } catch (error) {
-      console.error("Error creating transaction:", error);
-      toast.error(
-        "An error occurred while deleting the transaction. Please try again."
-      );
+      {
+        tid
+          ? console.error("Error updating transaction:", error)
+          : console.error("Error creating transaction:", error);
+      }
+      {
+        tid
+          ? toast.error(
+              "An error occurred while updating the transaction. Please try again."
+            )
+          : toast.error(
+              "An error occurred while deleting the transaction. Please try again."
+            );
+      }
     }
   };
- //Calulating income, expenses and net status
-  // const calculateTotals = () => {
-  //   const totalIncome = transactions.reduce(
-  //     (sum, transaction) => sum + (parseFloat(transaction.income) || 0),
-  //     0
-  //   );
-  //   const totalExpenses = transactions.reduce(
-  //     (sum, transaction) => sum + (parseFloat(transaction.expenses) || 0),
-  //     0
-  //   );
-  //   const netStatus = totalIncome - totalExpenses;
+  /* Calulating income, expenses and net status
+  const calculateTotals = () => {
+    const totalIncome = transactions.reduce(
+      (sum, transaction) => sum + (parseFloat(transaction.income) || 0),
+      0
+    );
+    const totalExpenses = transactions.reduce(
+      (sum, transaction) => sum + (parseFloat(transaction.expenses) || 0),
+      0
+    );
+    const netStatus = totalIncome - totalExpenses;
 
-  //   return { totalIncome, totalExpenses, netStatus };
-  // };
+    return { totalIncome, totalExpenses, netStatus };
+  }; */
 
- 
-
- const totals = calculateTotals(transactions);
+  
+  
   useEffect(() => {
     fillTable();
   }, []);
+
+ 
   return (
     <>
       &nbsp;
@@ -229,6 +281,7 @@ export default function Transactions() {
               selectAllChecked={selectedTransactions.has(index)}
               onSelectChange={() => handleSelectChange(index)}
               deleteFunction={deleteFunction}
+              editFunction = {editFunction}
             />
           ))}
           <tr>
@@ -247,65 +300,78 @@ export default function Transactions() {
           </tr>
         </MDBTableBody>
       </MDBTable>
-      <Form  id = "form1" onSubmit={(e)=>{e.preventDefault();
-        handleOnsubmit();
-        handleModalClose();
-
-      }}>
-      <Modal
-        show={modalShow}
-        onHide={handleModalClose}
-        backdrop="static"
-        keyboard={false}
+      <Form
+        id="form1"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleOnsubmit();
+          handleModalClose();
+        }}
       >
-        <Modal.Header closeButton>
-          <Modal.Title>Add Transaction</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form.Select
-            name="type"
-            value={transactionData.type}
-            onChange={handleOnChange}
-          >
-            <option value="income">Income</option>
-            <option value="expenses">Expenses</option>
-          </Form.Select>{" "}
-          &nbsp;
-          <MDBInput
-            style={{ width: "400px" }}
-            label="Enter Title"
-            id="form-icon-trailing"
-            name="title"
-            value={transactionData.title}
-            onChange={handleOnChange}
-          ></MDBInput>
-          &nbsp;
-          <MDBInput
-            style={{ width: "400px" }}
-            label="Enter Amount"
-            id="form-icon-trailing"
-            type="number"
-            name="amount"
-            value={transactionData.amount}
-            onChange={handleOnChange}
-          ></MDBInput>{" "}
-          &nbsp;
-          <Form.Control
-            type="date"
-            name="createdAt"
-            value={transactionData.createdAt}
-            onChange={handleOnChange}
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <MDBBtn color="danger" onClick={handleModalClose}>
-            Close
-          </MDBBtn>
-          <MDBBtn color="success" type="submit" form="form1">
-            Add
-          </MDBBtn>
-        </Modal.Footer>
-      </Modal>
+        <Modal
+          show={modalShow}
+          onHide={handleModalClose}
+          backdrop="static"
+          keyboard={false}
+        >
+          <Modal.Header closeButton>
+            {tid ? (
+              <Modal.Title>Edit Transaction</Modal.Title>
+            ) : (
+              <Modal.Title>Add Transaction</Modal.Title>
+            )}
+          </Modal.Header>
+          <Modal.Body>
+            <Form.Select
+              name="type"
+              value={transactionData.type}
+              onChange={handleOnChange}
+            >
+              <option value="income">Income</option>
+              <option value="expenses">Expenses</option>
+            </Form.Select>{" "}
+            &nbsp;
+            <MDBInput
+              style={{ width: "400px" }}
+              label="Enter Title"
+              id="form-icon-trailing"
+              name="title"
+              value={transactionData.title}
+              onChange={handleOnChange}
+            ></MDBInput>
+            &nbsp;
+            <MDBInput
+              style={{ width: "400px" }}
+              label="Enter Amount"
+              id="form-icon-trailing"
+              type="number"
+              name="amount"
+              value={transactionData.amount}
+              onChange={handleOnChange}
+            ></MDBInput>{" "}
+            &nbsp;
+            <Form.Control
+              type="date"
+              name="createdAt"
+              value={transactionData.createdAt}
+              onChange={handleOnChange}
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <MDBBtn color="danger" onClick={handleModalClose}>
+              Close
+            </MDBBtn>
+            {tid ? (
+              <MDBBtn color="success" type="submit" form="form1">
+                Update
+              </MDBBtn>
+            ) : (
+              <MDBBtn color="success" type="submit" form="form1">
+                Add
+              </MDBBtn>
+            )}
+          </Modal.Footer>
+        </Modal>
       </Form>
     </>
   );
