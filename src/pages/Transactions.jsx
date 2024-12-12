@@ -111,20 +111,33 @@ export default function Transactions() {
   });
   const fillFormData = async (transactionID) => {
     const response = await getTransactionsByID(transactionID);
-
+console.log(transactionID);
     if (response.status == "success") {
-      console.log(response.data);
-      setTransactionData({
-        title: response.data.title,
-        income: "",
-        expenses: "",
-        type: "",
-        createdAt: "",
-      });
+      // console.log(response.data);
+      // console.log(response.data.income)
+      // console.log(response.data.expenses)
+      if (response.data.income !== 0){ 
+        setTransactionData({
+          title: response.data.title,
+          amount: response.data.income,
+          type: "income",
+          createdAt: response.data.createdAt.split("T")[0]
+        });
+      }
+      if (response.data.expenses !== 0){
+        setTransactionData({
+          title: response.data.title,
+          amount: response.data.expenses,
+          type: "expenses",
+          createdAt: response.data.createdAt.split("T")[0]
+        });
+      }
+      
     } else {
       console.log("ERROR fetching Transaction data");
     }
   };
+  
   const totals = calculateTotals(transactions);
 
 
