@@ -17,11 +17,12 @@ import {
   deleteTransaction,
   createTransaction,
   updateTransaction,
+  getTransactionsByID,
 } from "../utils/axiosHelper";
 import { toast } from "react-toastify";
 import { Container } from "react-bootstrap";
 import { calculateTotals } from "../utils/helper";
-import { getTransactionbyID } from "../../../FinanceTrackerBackEnd/src/models/transactionsSchema";
+
 
 export default function Transactions() {
   const navigate = useNavigate();
@@ -109,7 +110,7 @@ export default function Transactions() {
     createdAt: "",
   });
   const fillFormData = async (transactionID) => {
-    const response = await getTransactionbyID(transactionID);
+    const response = await getTransactionsByID(transactionID);
 
     if (response.status == "success") {
       console.log(response.data);
