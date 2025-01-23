@@ -13,6 +13,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../utils/AuthContext";
 import { toast } from "react-toastify";
+import signUpimage from "../assets/financeTracker.png"
 
 const Signup = () => {
   const { signup } = useAuth();
@@ -123,7 +124,7 @@ const Signup = () => {
               lg="6"
               className="order-1 order-lg-2 d-flex align-items-center"
             >
-              <MDBCardImage src="src/assets/financeTracker.png" fluid />
+              <MDBCardImage src={signUpimage} fluid />
             </MDBCol>
           </MDBRow>
         </MDBCardBody>

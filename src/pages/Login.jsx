@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../utils/AuthContext";
 import { toast } from "react-toastify";
+import loginImage from "../assets/loginbgremove.png"
 
 export default function Login() {
   const navigate = useNavigate();
@@ -43,7 +44,7 @@ export default function Login() {
       <MDBRow>
         <MDBCol col="10" md="6">
           <img
-            src="src/assets/loginbgremove.png"
+            src={loginImage}
             // src="src/assets/login.jpg"
             class="img-fluid"
             alt="Phone image"
