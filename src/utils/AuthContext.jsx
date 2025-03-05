@@ -48,6 +48,7 @@ export const AuthProvider = ({ children }) => {
       const { user, token } = response.data;
       setJWTtoken(token);
       setUser(user);
+      await autoLogin();
       
     } catch (error) {
       console.log(`Login in failed :${error}`);
