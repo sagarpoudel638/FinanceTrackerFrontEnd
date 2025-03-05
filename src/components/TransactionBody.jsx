@@ -11,7 +11,7 @@ export const TransactionBody = ({
   
 }) => {
   //  console.log("transaction", transaction._id)
-  const formattedDate = transaction.createdAt.split("T")[0];
+  const formattedDate = transaction.createdAt? transaction.createdAt.split("T")[0]:"1";
   const navigate = useNavigate();
  
 

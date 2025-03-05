@@ -33,7 +33,7 @@ export default function Transactions() {
   // const location = useLocation();
   // const queryParams = new URLSearchParams(location.search);
   // const tid = queryParams.get("id");
-  const [tid, setTid] = useState();
+  const [transactionID, setTid] = useState();
 
   const fillTable = async () => {
     try {
@@ -87,7 +87,7 @@ export default function Transactions() {
       const response = await deleteTransaction(id);
       if (response.status == "success") {
         toast.success(response.message);
-        fillTable();
+        await fillTable();
       } else {
         toast.error(response.message.details);
       }
@@ -103,6 +103,7 @@ export default function Transactions() {
   const handleModalClose = () => setModalShow(false);
   // Creating Transaction
   const [transactionData, setTransactionData] = useState({
+    id:"",
     title: "",
     income: "",
     expenses: "",
@@ -110,18 +111,19 @@ export default function Transactions() {
     createdAt: "",
   });
   const fillFormData = async (transactionID) => {
+    console.log(transactionID);
     const response = await getTransactionsByID(transactionID);
-console.log(transactionID);
+    console.log(transactionID);
     if (response.status == "success") {
-      // console.log(response.data);
-      // console.log(response.data.income)
-      // console.log(response.data.expenses)
+      console.log(response);
+      console.log(response.data.income)
+      console.log(response.data.expenses)
       if (response.data.income !== 0){ 
         setTransactionData({
           title: response.data.title,
           amount: response.data.income,
           type: "income",
-          createdAt: response.data.createdAt.split("T")[0]
+          createdAt: response.data.createdAt ? response.data.createdAt.split("T")[0] : ""
         });
       }
       if (response.data.expenses !== 0){
@@ -129,7 +131,7 @@ console.log(transactionID);
           title: response.data.title,
           amount: response.data.expenses,
           type: "expenses",
-          createdAt: response.data.createdAt.split("T")[0]
+          createdAt: response.data.createdAt ? response.data.createdAt.split("T")[0] : ""
         });
       }
       
@@ -142,9 +144,11 @@ console.log(transactionID);
 
 
   const editFunction = (transactionid) => {
+     setTid(transactionid);
+     fillFormData(transactionid);
     setModalShow(true);
-    fillFormData(tid);
-    setTid(transactionid);
+   
+    
 
   };
 
@@ -166,6 +170,7 @@ console.log(transactionID);
       let updatedData = { ...prevData, [name]: value };
 
       if (name === "type") {
+        updatedData.amount = "";
         if (value === "income") {
           updatedData.income = prevData.amount || "0";
           updatedData.expenses = "0";
@@ -192,8 +197,8 @@ console.log(transactionID);
     
     let response;
     try {
-      if (tid) {
-        response = await updateTransaction(tid, transactionData);
+      if (transactionID) {
+        response = await updateTransaction(transactionID, transactionData);
       } else {
         response = await createTransaction(transactionData);
       }
@@ -207,12 +212,12 @@ console.log(transactionID);
       }
     } catch (error) {
       {
-        tid
+        transactionID
           ? console.error("Error updating transaction:", error)
           : console.error("Error creating transaction:", error);
       }
       {
-        tid
+        transactionID
           ? toast.error(
               "An error occurred while updating the transaction. Please try again."
             )
@@ -329,7 +334,7 @@ console.log(transactionID);
           keyboard={false}
         >
           <Modal.Header closeButton>
-            {tid ? (
+            {transactionID ? (
               <Modal.Title>Edit Transaction</Modal.Title>
             ) : (
               <Modal.Title>Add Transaction</Modal.Title>
@@ -375,7 +380,7 @@ console.log(transactionID);
             <MDBBtn color="danger" onClick={handleModalClose}>
               Close
             </MDBBtn>
-            {tid ? (
+            {transactionID ? (
               <MDBBtn color="success" type="submit" form="form1">
                 Update
               </MDBBtn>

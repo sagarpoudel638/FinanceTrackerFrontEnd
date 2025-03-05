@@ -115,14 +115,25 @@ export const createTransaction = async (transactionData) => {
 };
 
 export const updateTransaction = async (id, transactionData)=>{
-  let token = getJWTtoken();
-  const obj = {
-    method: "patch",
-    url:`${transactionEP}/${id}`,
-    data: transactionData,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  try {
+    if (!id) throw new Error("Transaction ID is missing.");
+    
+    let token = getJWTtoken();
+    
+    const obj = {
+      method: "PATCH", // PATCH should be in uppercase (though not strictly required)
+      url: `${transactionEP}/${id}`,
+      data: transactionData,
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const response = await apiProcessor(obj);
+
+    return response; // Return response for further handling
+  } catch (error) {
+    console.error("Error updating transaction:", error);
+    return { status: "error", message: error.message }; // Return a structured error
   }
-  return await apiProcessor(obj);
 }
