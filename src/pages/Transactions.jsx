@@ -114,28 +114,49 @@ export default function Transactions() {
     console.log(transactionID);
     const response = await getTransactionsByID(transactionID);
     console.log(transactionID);
-    if (response.status == "success") {
-      console.log(response);
-      console.log(response.data.income)
-      console.log(response.data.expenses)
-      if (response.data.income !== 0){ 
-        setTransactionData({
-          title: response.data.title,
-          amount: response.data.income,
-          type: "income",
-          createdAt: response.data.createdAt ? response.data.createdAt.split("T")[0] : ""
-        });
-      }
-      if (response.data.expenses !== 0){
-        setTransactionData({
-          title: response.data.title,
-          amount: response.data.expenses,
-          type: "expenses",
-          createdAt: response.data.createdAt ? response.data.createdAt.split("T")[0] : ""
-        });
-      }
+    // if (response.status == "success") {
+    //   // console.log(response);
+    //   // console.log(response.data.income)
+    //   // console.log(response.data.expenses)
+    //   if (response.data.income !== 0){ 
+    //     setTransactionData({
+    //       title: response.data.title,
+    //       amount: response.data.income,
+    //       type: "income",
+    //       createdAt: response.data.createdAt ? response.data.createdAt.split("T")[0] : ""
+    //     });
+    //   }
+    //   if (response.data.expenses !== 0){
+    //     setTransactionData({
+    //       title: response.data.title,
+    //       amount: response.data.expenses,
+    //       type: "expenses",
+    //       createdAt: response.data.createdAt ? response.data.createdAt.split("T")[0] : ""
+    //     });
+    //   }
       
-    } else {
+    // } 
+    if (response.status === "success") {
+      const { title, income, expenses, createdAt } = response.data;
+      
+      // Determine the transaction type
+      let type = "income"; // Default type
+      let amount = income; 
+  
+      if (expenses !== "0") {
+        type = "expenses";
+        amount = expenses;
+      }
+  
+      // Set transaction data once
+      setTransactionData({
+        title,
+        amount,
+        type,
+        createdAt: createdAt ? createdAt.split("T")[0] : "",
+      });
+    }
+    else {
       console.log("ERROR fetching Transaction data");
     }
   };
@@ -152,32 +173,17 @@ export default function Transactions() {
 
   };
 
-  // const handleOnChange = (e) => {
-  //   const { name, value } = e.target;
-
-  //   setTransactionData((prevData) => ({
-  //     ...prevData,
-  //     [name]: value,
-  //   }));
-
-  //   console.log({ ...transactionData, [name]: value });
-  // };
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
-
+  
     setTransactionData((prevData) => {
       let updatedData = { ...prevData, [name]: value };
-
+  
       if (name === "type") {
-        updatedData.amount = "";
-        if (value === "income") {
-          updatedData.income = prevData.amount || "0";
-          updatedData.expenses = "0";
-        } else if (value === "expenses") {
-          updatedData.expenses = prevData.amount || "0";
-          updatedData.income = "0";
-        }
+        updatedData.amount = ""; 
+        updatedData.income = value === "income" ? prevData.amount || "0" : "0";
+        updatedData.expenses = value === "expenses" ? prevData.amount || "0" : "0";
       } else if (name === "amount") {
         if (prevData.type === "income") {
           updatedData.income = value;
@@ -187,10 +193,9 @@ export default function Transactions() {
           updatedData.income = "0";
         }
       }
-
+  
       return updatedData;
     });
-
     console.log(transactionData);
   };
   const handleOnsubmit = async (e) => {
@@ -246,7 +251,7 @@ export default function Transactions() {
   
   useEffect(() => {
     fillTable();
-  }, []);
+  }, [transactionData]);
 
  
   return (
@@ -346,6 +351,7 @@ export default function Transactions() {
               value={transactionData.type}
               onChange={handleOnChange}
             >
+              <option value="">Select:</option>
               <option value="income">Income</option>
               <option value="expenses">Expenses</option>
             </Form.Select>{" "}
