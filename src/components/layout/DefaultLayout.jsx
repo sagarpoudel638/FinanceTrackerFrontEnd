@@ -7,8 +7,6 @@ export const DefaultLayout = () => {
   return (
     <div className="layout-container">
       <Header />
-
-      {/* Content goes here */}
       <main className="content-wrap">
         <Outlet />
       </main>
