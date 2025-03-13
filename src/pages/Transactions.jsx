@@ -7,14 +7,7 @@ import {
   MDBBtn,
   MDBIcon,
   MDBTableBody,
-  MDBModal,
-  MDBModalDialog,
-  MDBModalContent,
-  MDBModalHeader,
-  MDBModalTitle,
-  MDBModalBody,
-  MDBModalFooter,
-
+ 
 } from "mdb-react-ui-kit";
 import { useLocation, useNavigate } from "react-router-dom";
 import Form from "react-bootstrap/Form";
@@ -42,7 +35,8 @@ export default function Transactions() {
   // const tid = queryParams.get("id");
   const [transactionID, setTid] = useState();
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const fillTable = async () => {
     try {
@@ -107,58 +101,78 @@ export default function Transactions() {
 
   const handleDeleteSelected = async () => {
     if (selectedTransactions.size === 0) {
-      toast.warn('No transactions selected.');
+      toast.warn("No transactions selected.");
       return;
     }
-  
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete ${selectedTransactions.size} selected transaction(s)?`
-    );
-  
-    if (!confirmDelete) return;
-  
+    openDeleteConfirmModal([...selectedTransactions]); // Pass selected transaction
+  };
+
+  const confirmDelete = async () => {
     try {
-      for (let id of selectedTransactions) {
-        const response = await deleteTransaction(id);
-        if (response.status === 'success') {
-          toast.success(`Deleted transaction with ID: ${id}`);
+      if (!deleteTarget) return;
+
+      if (Array.isArray(deleteTarget)) {
+        // Multiple delete
+        for (let id of deleteTarget) {
+          const response = await deleteTransaction(id);
+          if (response.status === "success") {
+            toast.success(`Deleted transaction`);
+          } else {
+            toast.error(
+              response.message.details || `Failed to delete ID: ${id}`
+            );
+          }
+        }
+      } else {
+        // Single delete
+        const response = await deleteTransaction(deleteTarget);
+        if (response.status === "success") {
+          toast.success(response.message);
         } else {
-          toast.error(response.message.details || `Failed to delete ID: ${id}`);
+          toast.error(response.message.details);
         }
       }
-  
-      // After deleting all, refetch data and clear selections
+
       await fillTable();
       setSelectedTransactions(new Set());
     } catch (error) {
-      console.error('Error deleting transactions:', error);
-      toast.error('An error occurred while deleting selected transactions.');
+      toast.error("An error occurred during deletion.");
+    } finally {
+      closeDeleteConfirmModal();
     }
   };
-  
 
   // Delete Function
   const deleteFunction = async (id) => {
-    try {
-      const response = await deleteTransaction(id);
-      if (response.status == "success") {
-        toast.success(response.message);
-        await fillTable();
-      } else {
-        toast.error(response.message.details);
-      }
-    } catch (error) {
-      console.error("Error deleting transaction:", error);
-      toast.error(
-        "An error occurred while deleting the transaction. Please try again."
-      );
-    }
+    // try {
+    //   const response = await deleteTransaction(id);
+    //   if (response.status == "success") {
+    //     toast.success(response.message);
+    //     await fillTable();
+    //   } else {
+    //     toast.error(response.message.details);
+    //   }
+    // } catch (error) {
+    //   console.error("Error deleting transaction:", error);
+    //   toast.error(
+    //     "An error occurred while deleting the transaction. Please try again."
+    //   );
+    // }
+    openDeleteConfirmModal(id);
   };
   //Modal
   const handleModalShow = () => setModalShow(true);
   const handleModalClose = () => setModalShow(false);
+  const openDeleteConfirmModal = (transactionIds) => {
+    setDeleteTarget(transactionIds);
+    setShowDeleteConfirmModal(true);
+  };
 
- 
+  const closeDeleteConfirmModal = () => {
+    setDeleteTarget(null);
+    setShowDeleteConfirmModal(false);
+  };
+
   // Creating Transaction
   const [transactionData, setTransactionData] = useState({
     id: "",
@@ -306,15 +320,17 @@ export default function Transactions() {
   return (
     <>
       &nbsp;
-      
       <Container style={{ display: "flex" }}>
-       
         <div style={{ display: "flex" }}>
           <MDBBtn color="success" fas onClick={handleModalShow}>
             <MDBIcon fas icon="add" />
           </MDBBtn>{" "}
           &nbsp;
-          <MDBBtn color="danger" onClick={handleDeleteSelected} disabled={selectedTransactions.size === 0}>
+          <MDBBtn
+            color="danger"
+            onClick={handleDeleteSelected}
+            disabled={selectedTransactions.size === 0}
+          >
             <MDBIcon fas icon="trash" />
           </MDBBtn>
         </div>{" "}
@@ -331,6 +347,33 @@ export default function Transactions() {
           {/* <MDBIcon fas icon="search" /> */}
         </MDBInput>
       </Container>
+      <Modal
+        show={showDeleteConfirmModal}
+        onHide={closeDeleteConfirmModal}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Deletion</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {Array.isArray(deleteTarget) ? (
+            <p>
+              Are you sure you want to delete{" "}
+              <strong>{deleteTarget.length}</strong> selected transactions?
+            </p>
+          ) : (
+            <p>Are you sure you want to delete this transaction?</p>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <MDBBtn color="secondary" onClick={closeDeleteConfirmModal}>
+            Cancel
+          </MDBBtn>
+          <MDBBtn color="danger" onClick={confirmDelete}>
+            Delete
+          </MDBBtn>
+        </Modal.Footer>
+      </Modal>
       <MDBTable striped hover responsive="sm">
         <MDBTableHead>
           <tr>
@@ -460,9 +503,6 @@ export default function Transactions() {
             )}
           </Modal.Footer>
         </Modal>
-
-
-        
       </Form>
     </>
   );
