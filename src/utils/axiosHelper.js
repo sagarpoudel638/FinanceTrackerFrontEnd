@@ -137,3 +137,23 @@ export const updateTransaction = async (id, transactionData)=>{
     return { status: "error", message: error.message }; // Return a structured error
   }
 }
+export const verifyEmail = async (token) => {
+  console.log("axios line 141 inside verfiyemail", token,import.meta.env.VITE_BACKEND_URL)
+  const obj = {
+    method: "GET",
+    url: `${import.meta.env.VITE_API_URL}/auth/useremailverification/${token}`,
+  };
+
+  return await apiProcessor(obj);
+};
+
+export const resendVerificationEmail = async (email) => {
+  const obj = {
+    method: "post",
+    url: `${authEP}/resend-verification`,
+    data: { email },
+  };
+
+  return await apiProcessor(obj);
+};
+
