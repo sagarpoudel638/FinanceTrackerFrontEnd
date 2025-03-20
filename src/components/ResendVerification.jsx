@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { resendVerificationEmail } from "../utils/axiosHelper"; // adjust the path as needed
 import { toast } from "react-toastify";
+import { Navigate } from "react-router-dom";
 
 const ResendVerification = ({ email }) => {
   const [loading, setLoading] = useState(false);
@@ -18,6 +19,7 @@ const ResendVerification = ({ email }) => {
 
       if (res.status === "success") {
         toast.success(res.message || "Verification email sent!");
+        Navigate("/login")
       } else {
         toast.error(res.message || "Failed to send verification email.");
       }
