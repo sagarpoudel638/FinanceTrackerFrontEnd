@@ -12,8 +12,9 @@ import {
   Legend,
   ArcElement,
 } from "chart.js";
+import { getSuggestions } from "../utils/axiosHelper";
 
-import "../App.css"; 
+import "../App.css";
 
 ChartJS.register(
   CategoryScale,
@@ -29,6 +30,8 @@ const Dashboard = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [suggestions, setSuggestions] = useState(""); // Store AI suggestions
+  const [showModal, setShowModal] = useState(false); // Control modal visibility
 
   const fillDashboard = async () => {
     try {
@@ -54,6 +57,24 @@ const Dashboard = () => {
   }, []);
 
   const totals = useMemo(() => calculateTotals(transactions), [transactions]);
+  const fetchSuggestions = async () => {
+    try {
+      const response = await getSuggestions();
+      console.log("Fetched Suggestions:", response);
+
+      if (response && response.suggestion) {
+        setSuggestions(response.suggestion);
+        setShowModal(true);
+      } else {
+        setSuggestions("Failed to process suggestions.");
+        setShowModal(true);
+      }
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+      setSuggestions("Error retrieving AI suggestions.");
+      setShowModal(true);
+    }
+  };
 
   const data = {
     labels: ["Income", "Expenses"],
@@ -137,6 +158,31 @@ const Dashboard = () => {
               <Pie data={data} options={pieOptions} />
             </div>
           </div>
+
+          <button onClick={fetchSuggestions} className="suggestion-button">
+            AI Suggestion
+          </button>
+
+          {showModal && (
+            <div className="modal">
+              <div className="modal-content">
+                <button
+                  className="close-button"
+                  onClick={() => setShowModal(false)}
+                >
+                  ×
+                </button>
+                <div className="modal-header">💡 AI Financial Suggestion</div>
+                <div className="modal-body">{suggestions}</div>
+                <button
+                  className="suggestion-button"
+                  onClick={() => setShowModal(false)}
+                >
+                  Got It!
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
     </>

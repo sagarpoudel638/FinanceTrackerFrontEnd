@@ -157,3 +157,16 @@ export const resendVerificationEmail = async (email) => {
   return await apiProcessor(obj);
 };
 
+export const getSuggestions = async () => {
+  let token = getJWTtoken();
+  const obj = {
+    method: "get",
+    url: transactionEP + "/suggestions",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  const response = await apiProcessor(obj);
+  console.log("Suggestion API Response:", response);
+  return response;
+};
