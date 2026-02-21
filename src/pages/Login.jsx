@@ -25,52 +25,53 @@ export default function Login() {
 
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
-  // const handleOnSubmit = async (e) => {
-  //   e.preventDefault();
-  
-  //   try {
-  //     const result = await login(formData);
-  //     console.log("Result from login():", result);
-  
-  //     if (!result) {
-  //       toast.error("Unexpected error occurred.");
-  //       return;
-  //     }
-  
-  //     if (result.status === "success") {
-  //       toast.success("Login successful!");
-  //       navigate("/dashboard");
-  //     } else if (result.code === 403 || result.message === "Not verified") {
-  //       toast.error("Please verify your email first!");
-  //       navigate("/verification");
-  //     } else {
-  //       toast.error(result.message || "Login failed");
-  //     }
-  //   } catch (error) {
-  //     console.error("Catch block error:", error);
-  
-  //     if (error.message === "Email not verified. Please check your inbox!") {
-  //       toast.warning(error.message);
-  //     } else {
-  //       toast.error(error.message);
-  //     }
-  //   }
-  // };
-  
-
   const handleOnSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
-      await login(formData);
+      const result = await login(formData);
+      console.log("Result from login():", result);
+  
+      if (!result) {
+        toast.error("Unexpected error occurred.");
+        return;
+      }
+  
+      if (result.status === "success") {
+        toast.success("Login successful!");
+        navigate("/dashboard");
+      } else if (result.code === 403 || result.message === "Not verified") {
+        toast.error("Please verify your email first!");
+        navigate("/verification");
+      } else {
+        toast.error(result.message || "Login failed");
+      }
     } catch (error) {
-      toast.error("Login Failed")
-      console.log(error,"login error")
-    }  
+      console.error("Catch block error:", error);
+  
+      if (error.message === "Email not verified. Please check your inbox!") {
+        toast.warning(error.message);
+      } else {
+        toast.error(error.message);
+      }
+    }
+  };
+  
+
+  // const handleOnSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   try {
+  //     await login(formData);
+  //   } catch (error) {
+  //     toast.error("Login Failed")
+  //     console.log(error,"login error")
+  //   }  
+    
     
      
       
-  };
+  // };
 
   const handleOnchange = (e) => {
     const { name, value } = e.target;
