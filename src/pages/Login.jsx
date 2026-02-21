@@ -25,37 +25,47 @@ export default function Login() {
 
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
-  const handleOnSubmit = async (e) => {
-    e.preventDefault();
-  
-    try {
-      const result = await login(formData);
-      console.log("Result from login():", result);
-  
-      if (!result) {
-        toast.error("Unexpected error occurred.");
-        return;
-      }
-  
-      if (result.status === "success") {
-        toast.success("Login successful!");
-        navigate("/dashboard");
-      } else if (result.code === 403 || result.message === "Not verified") {
-        toast.error("Please verify your email first!");
-        navigate("/verification");
-      } else {
-        toast.error(result.message || "Login failed");
-      }
-    } catch (error) {
-      console.error("Catch block error:", error);
-  
-      if (error.message === "Email not verified. Please check your inbox!") {
-        toast.warning(error.message);
-      } else {
-        toast.error(error.message);
-      }
+ const handleOnSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const result = await login(formData);
+
+ 
+    if (result?.status === "success") {
+      toast.success("Login successful!");
+      navigate("/dashboard");
+      return;
     }
-  };
+
+
+    const code = result?.error?.code;
+    if (code === 403) {
+      toast.warning("Please verify your email first!");
+      navigate("/verification", { state: { email: formData.email } });
+      return;
+    }
+
+    toast.error(result?.message || "Login failed");
+  } catch (error) {
+    const status = error?.response?.status;
+    const msg = error?.response?.data?.message || error?.message || "Login failed";
+
+    if (status === 403) {
+      toast.warning("Please verify your email first!");
+      navigate("/verification", { state: { email: formData.email } });
+      return;
+    }
+
+    if (status === 401) {
+      toast.error("Invalid email or password");
+      return;
+    }
+
+    toast.error(msg);
+    console.log("Catch block error:", error);
+  }
+};
   
 
   // const handleOnSubmit = async (e) => {
