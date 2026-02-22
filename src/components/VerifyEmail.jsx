@@ -66,3 +66,4 @@ const VerifyEmail = () => {
     </div>
   );
 };
+export default VerifyEmail;
