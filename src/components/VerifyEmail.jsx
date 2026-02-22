@@ -1,45 +1,46 @@
 import React, { useEffect, useState } from "react";
 import { verifyEmail } from "../utils/axiosHelper";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const VerifyEmail = () => {
   const [loading, setLoading] = useState(true);
-  const [status, setStatus] = useState(""); // success | failed
+  const [status, setStatus] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const verify = async () => {
-      const urlParams = new URLSearchParams(window.location.search);
+      const urlParams = new URLSearchParams(location.search);
       const token = urlParams.get("token");
 
       if (!token) {
         setStatus("failed");
+        setLoading(false);
         toast.error("Invalid verification link");
+
+        setTimeout(() => navigate("/login"), 3000);
         return;
       }
 
       try {
-        console.log(token)
         await verifyEmail(token);
         setStatus("success");
         toast.success("Email verified successfully!");
       } catch (error) {
         console.error(error);
         setStatus("failed");
-        toast.error("Verification failed");
+        toast.error(
+          error?.response?.data?.message || "Verification failed"
+        );
       } finally {
         setLoading(false);
-
-        // Wait 3 seconds before navigating to login
-        setTimeout(() => {
-          navigate("/login");
-        }, 3000);
+        setTimeout(() => navigate("/login"), 3000);
       }
     };
 
     verify();
-  }, [navigate]);
+  }, [navigate, location.search]);
 
   if (loading) {
     return (
@@ -65,33 +66,3 @@ const VerifyEmail = () => {
     </div>
   );
 };
-
-const styles = {
-  container: {
-    height: "100vh",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f7f7f7",
-  },
-  title: {
-    fontSize: "24px",
-    color: "#333",
-  },
-  success: {
-    fontSize: "24px",
-    color: "#28a745",
-  },
-  error: {
-    fontSize: "24px",
-    color: "#dc3545",
-  },
-  info: {
-    fontSize: "16px",
-    color: "#555",
-    marginTop: "10px",
-  },
-};
-
-export default VerifyEmail;
