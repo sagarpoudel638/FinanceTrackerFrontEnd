@@ -25,6 +25,7 @@ import { Container } from "react-bootstrap";
 import { calculateTotals } from "../utils/helper";
 
 export default function Transactions() {
+  console.count("Transactions render");
   const navigate = useNavigate();
   const [modalShow, setModalShow] = useState(false);
   const [transactions, setTransactions] = useState([]);
@@ -64,9 +65,11 @@ export default function Transactions() {
   };
 
   // Filter transactions based on the search term
-  const filteredTransactions = transactions.filter((transaction) =>
-    transaction.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTransactions = Array.isArray(transactions)
+  ? transactions.filter((t) =>
+      (t.title || "").toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  : [];
 
   // // Handle all checkbox selection
   // const handleSelectAll = () => {
@@ -489,7 +492,7 @@ export default function Transactions() {
             />
           </Modal.Body>
           <Modal.Footer>
-            <MDBBtn color="danger" onClick={handleModalClose}>
+            <MDBBtn color="danger" type="button" onClick={handleModalClose}>
               Close
             </MDBBtn>
             {transactionID ? (

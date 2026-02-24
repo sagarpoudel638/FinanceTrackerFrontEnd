@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
   userSignup,
   userLogin,
@@ -48,13 +48,30 @@ export const AuthProvider = ({ children }) => {
   //   }
   // };
 
+  // const autoLogin = async () => {
+  //   const response = await verifyToken();
+  //   if (response.status == "success") {
+  //     setUser(response.data.user);
+  //     console.log(response.data.user);
+  //   }
+  // };
   const autoLogin = async () => {
+  const token = getJWTtoken();
+  if (!token) return;
+
+  try {
     const response = await verifyToken();
-    if (response.status == "success") {
+    if (response?.status === "success") {
       setUser(response.data.user);
-      console.log(response.data.user);
+    } else {
+      removeJWTtoken();
+      setUser(null);
     }
-  };
+  } catch (err) {
+    removeJWTtoken();
+    setUser(null);
+  }
+};
   const logout = () => {
     removeJWTtoken();
     setUser(null);
@@ -138,7 +155,7 @@ export const AuthProvider = ({ children }) => {
         const { user, token } = response.data;
           setJWTtoken(token);
           setUser(user);
-          await autoLogin();
+          // await autoLogin();
           toast.success("login in successful!");
           navigate("/dashboard");
         
@@ -157,7 +174,13 @@ export const AuthProvider = ({ children }) => {
       throw new Error("login in  failed. Please check your credentials.");
     }
   };
+const didRun = useRef(false);
 
+useEffect(() => {
+  if (didRun.current) return;
+  didRun.current = true;
+  autoLogin();
+}, []);
   return (
     <AuthContext.Provider
       value={{
