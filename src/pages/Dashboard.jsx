@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { getTransactions } from "../utils/axiosHelper";
+import { getTransactions, getSuggestions } from "../utils/axiosHelper";
 import { calculateTotals } from "../utils/helper";
 import { Bar, Pie } from "react-chartjs-2";
 import {
@@ -12,7 +12,6 @@ import {
   Legend,
   ArcElement,
 } from "chart.js";
-import { getSuggestions } from "../utils/axiosHelper";
 
 import "../App.css";
 
@@ -30,8 +29,9 @@ const Dashboard = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [suggestions, setSuggestions] = useState(""); // Store AI suggestions
-  const [showModal, setShowModal] = useState(false); // Control modal visibility
+  const [suggestions, setSuggestions] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   const fillDashboard = async () => {
     try {
@@ -58,20 +58,14 @@ const Dashboard = () => {
 
   const totals = useMemo(() => calculateTotals(transactions), [transactions]);
   const fetchSuggestions = async () => {
+    setLoadingSuggestions(true);
     try {
       const response = await getSuggestions();
-      console.log("Fetched Suggestions:", response);
-
-      if (response && response.suggestion) {
-        setSuggestions(response.suggestion);
-        setShowModal(true);
-      } else {
-        setSuggestions("Failed to process suggestions.");
-        setShowModal(true);
-      }
+      setSuggestions(response?.suggestion || "Could not generate suggestions. Please try again.");
     } catch (error) {
-      console.error("Error fetching suggestions:", error);
-      setSuggestions("Error retrieving AI suggestions.");
+      setSuggestions("Error retrieving AI suggestions. Please try again.");
+    } finally {
+      setLoadingSuggestions(false);
       setShowModal(true);
     }
   };
@@ -159,8 +153,12 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <button onClick={fetchSuggestions} className="suggestion-button">
-            AI Suggestion
+          <button
+            onClick={fetchSuggestions}
+            className="suggestion-button"
+            disabled={loadingSuggestions}
+          >
+            {loadingSuggestions ? "Generating..." : "💡 AI Suggestion"}
           </button>
 
           {showModal && (
@@ -172,8 +170,10 @@ const Dashboard = () => {
                 >
                   ×
                 </button>
-                <div className="modal-header">💡 AI Financial Suggestion</div>
-                <div className="modal-body">{suggestions}</div>
+                <div className="modal-header">💡 AI Financial Suggestions</div>
+                <div className="modal-body" style={{ whiteSpace: "pre-line" }}>
+                  {suggestions}
+                </div>
                 <button
                   className="suggestion-button"
                   onClick={() => setShowModal(false)}
