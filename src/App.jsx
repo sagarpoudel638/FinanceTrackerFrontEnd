@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import 'react-toastify/dist/ReactToastify.css';
 import "./App.css";
 import { Routes,Route } from "react-router-dom";
@@ -15,21 +15,8 @@ import VerifyEmailPage from "./pages/VerifyEmailPage.jsx"
 
 
 function App() {
-  const { autoLogin, globalMessage, setGlobalMessage } = useAuth();
-  useEffect(() => {
-    const token = localStorage.getItem("accessJWT");
-  
-    if (!token) {
-      console.log("No token found. Skipping autoLogin.");
-      return;
-    }
-    autoLogin().catch(err => {
-      console.error("AutoLogin failed:", err);
-     
-      
-    });
-  }, []);
-  
+  const { globalMessage, setGlobalMessage } = useAuth();
+
   useEffect(() => {
     if (globalMessage) {
       toast(globalMessage);
@@ -39,17 +26,16 @@ function App() {
   return (
     <>
       <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="signup" element={<Signup />} />
-        <Route path="login" element={<Login />} />
+        <Route path="/" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
-        <Route path="/verification" element={<VerifyEmailPage />} /> 
+        <Route path="/verification" element={<VerifyEmailPage />} />
 
-        <Route path="/" element={<DefaultLayout/>}>
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="transactions" element={<Transactions />} />
-        <Route path="test" element={<ProductsDemo />} />
-
+        <Route element={<DefaultLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/transactions" element={<Transactions />} />
+          <Route path="/test" element={<ProductsDemo />} />
         </Route>
       </Routes>
       <ToastContainer/>

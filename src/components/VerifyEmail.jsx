@@ -66,4 +66,33 @@ const VerifyEmail = () => {
     </div>
   );
 };
+
+const styles = {
+  container: {
+    height: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f7f7f7",
+  },
+  title: {
+    fontSize: "24px",
+    color: "#555",
+  },
+  success: {
+    fontSize: "28px",
+    color: "#00b894",
+  },
+  error: {
+    fontSize: "28px",
+    color: "#e74c3c",
+  },
+  info: {
+    fontSize: "14px",
+    color: "#777",
+    marginTop: "8px",
+  },
+};
+
 export default VerifyEmail;

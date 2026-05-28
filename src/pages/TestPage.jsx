@@ -7,20 +7,20 @@ import { MDBBtn, MDBIcon } from "mdb-react-ui-kit";
 export default function ProductsDemo() {
   const [transactions, setTransactions] = useState(null);
   const [selectedTransactions, setSelectedTransactions] = useState(null);
+  const [error, setError] = useState(null);
 
   const fillTable = async () => {
     try {
       const response = await getTransactions();
       if (response?.status === "error") {
+        setError(response.message);
         setTransactions([]);
-        throw new Error(response.message);
       } else {
-        console.log(response.data);
         setTransactions(response.data);
       }
-    } catch (error) {
-      setError(error.message);
-      setPosts([]);
+    } catch (err) {
+      setError(err.message);
+      setTransactions([]);
     }
   };
   useEffect(() => {

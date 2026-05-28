@@ -25,63 +25,28 @@ export default function Login() {
 
   const togglePasswordVisibility = () => setShowPassword((prev) => !prev);
 
- const handleOnSubmit = async (e) => {
-  e.preventDefault();
+  const handleOnSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const result = await login(formData);
 
-  try {
-    const result = await login(formData);
+      if (result?.status === "success") {
+        toast.success("Login successful!");
+        navigate("/dashboard");
+        return;
+      }
 
- 
-    if (result?.status === "success") {
-      toast.success("Login successful!");
-      navigate("/dashboard");
-      return;
+      if (result?.error?.code === 403) {
+        toast.warning("Please verify your email first!");
+        navigate("/verification", { state: { email: formData.email } });
+        return;
+      }
+
+      toast.error(result?.message || "Login failed");
+    } catch (error) {
+      toast.error(error?.message || "Login failed");
     }
-
-
-    const code = result?.error?.code;
-    if (code === 403) {
-      toast.warning("Please verify your email first!");
-      navigate("/verification", { state: { email: formData.email } });
-      return;
-    }
-
-    toast.error(result?.message || "Login failed");
-  } catch (error) {
-    const status = error?.response?.status;
-    const msg = error?.response?.data?.message || error?.message || "Login failed";
-
-    if (status === 403) {
-      toast.warning("Please verify your email first!");
-      navigate("/verification", { state: { email: formData.email } });
-      return;
-    }
-
-    if (status === 401) {
-      toast.error("Invalid email or password");
-      return;
-    }
-
-    toast.error(msg);
-    console.log("Catch block error:", error);
-  }
-};
-  
-
-  // const handleOnSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     await login(formData);
-  //   } catch (error) {
-  //     toast.error("Login Failed")
-  //     console.log(error,"login error")
-  //   }  
-    
-    
-     
-      
-  // };
+  };
 
   const handleOnchange = (e) => {
     const { name, value } = e.target;

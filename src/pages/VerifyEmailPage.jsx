@@ -1,6 +1,5 @@
 import React from "react";
-import ResendVerification from "../components/ResendVerification"; // Update path as needed
-import { useParams } from "react-router-dom";
+import ResendVerification from "../components/ResendVerification";
 
 const VerifyEmailPage = () => {
   const userEmail = localStorage.getItem("userEmail"); // Make sure you save email when user signs up or logs in!

@@ -35,11 +35,18 @@ const Signup = () => {
 
   const handleOnsubmit = async (e) => {
     e.preventDefault();
-
-    await signup(formData);
-    localStorage.setItem("userEmail", formData.email);
-    toast.success("Sign up successful!");
-    navigate("/login");
+    try {
+      const response = await signup(formData);
+      if (response?.status === "success") {
+        localStorage.setItem("userEmail", formData.email);
+        toast.success("Sign up successful! Please check your email to verify your account.");
+        navigate("/login");
+      } else {
+        toast.error(response?.message || "Sign up failed. Please try again.");
+      }
+    } catch (error) {
+      toast.error("Sign up failed. Please try again.");
+    }
   };
 
   const handleOnchange = (e) => {

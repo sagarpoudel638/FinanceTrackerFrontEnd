@@ -43,20 +43,14 @@ export default function Transactions() {
     try {
       const response = await getTransactions();
       if (response?.status === "error") {
-        setTransactions({
-          type: "income",
-          title: "",
-          amount: "",
-          createdAt: "",
-        });
-        throw new Error(response.message);
+        toast.error(response.message || "Failed to fetch transactions.");
+        setTransactions([]);
       } else {
-        //console.log(response.data);
         setTransactions(response.data);
       }
     } catch (error) {
-      //setError(error.message);
-      setTransactions({});
+      toast.error("Failed to fetch transactions.");
+      setTransactions([]);
     }
   };
 
@@ -163,9 +157,15 @@ export default function Transactions() {
     // }
     openDeleteConfirmModal(id);
   };
+  const emptyTransactionData = { id: "", title: "", income: "", expenses: "", type: "", createdAt: "" };
+
   //Modal
   const handleModalShow = () => setModalShow(true);
-  const handleModalClose = () => setModalShow(false);
+  const handleModalClose = () => {
+    setModalShow(false);
+    setTid(undefined);
+    setTransactionData(emptyTransactionData);
+  };
   const openDeleteConfirmModal = (transactionIds) => {
     setDeleteTarget(transactionIds);
     setShowDeleteConfirmModal(true);
@@ -176,15 +176,8 @@ export default function Transactions() {
     setShowDeleteConfirmModal(false);
   };
 
-  // Creating Transaction
-  const [transactionData, setTransactionData] = useState({
-    id: "",
-    title: "",
-    income: "",
-    expenses: "",
-    type: "",
-    createdAt: "",
-  });
+  // Creating / editing transaction
+  const [transactionData, setTransactionData] = useState({ id: "", title: "", income: "", expenses: "", type: "", createdAt: "" });
   const fillFormData = async (transactionID) => {
     console.log(transactionID);
     const response = await getTransactionsByID(transactionID);
@@ -268,37 +261,25 @@ export default function Transactions() {
     });
     console.log(transactionData);
   };
-  const handleOnsubmit = async (e) => {
-    let response;
+  const handleOnsubmit = async () => {
     try {
-      if (transactionID) {
-        response = await updateTransaction(transactionID, transactionData);
-      } else {
-        response = await createTransaction(transactionData);
-      }
+      const response = transactionID
+        ? await updateTransaction(transactionID, transactionData)
+        : await createTransaction(transactionData);
 
-      console.log(response.status);
-      if (response.status == "success") {
-        navigate("/transactions");
-        handleModalClose();
-        setTransactionData("");
+      if (response.status === "success") {
         toast.success(response.message);
+        handleModalClose();
+        await fillTable();
+      } else {
+        toast.error(response.message || "Operation failed. Please try again.");
       }
     } catch (error) {
-      {
+      toast.error(
         transactionID
-          ? console.error("Error updating transaction:", error)
-          : console.error("Error creating transaction:", error);
-      }
-      {
-        transactionID
-          ? toast.error(
-              "An error occurred while updating the transaction. Please try again."
-            )
-          : toast.error(
-              "An error occurred while deleting the transaction. Please try again."
-            );
-      }
+          ? "An error occurred while updating the transaction. Please try again."
+          : "An error occurred while creating the transaction. Please try again."
+      );
     }
   };
   /* Calulating income, expenses and net status
@@ -318,7 +299,7 @@ export default function Transactions() {
 
   useEffect(() => {
     fillTable();
-  }, [transactionData]);
+  }, []);
 
   return (
     <>
@@ -435,10 +416,9 @@ export default function Transactions() {
       </MDBTable>
       <Form
         id="form1"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          handleOnsubmit();
-          handleModalClose();
+          await handleOnsubmit();
         }}
       >
         <Modal

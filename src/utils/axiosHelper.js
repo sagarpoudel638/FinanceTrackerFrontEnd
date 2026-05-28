@@ -32,17 +32,16 @@ export const verifyToken = async () => {
 
 const apiProcessor = async ({ method, url, data, headers }) => {
   try {
-    const response = await axios({
-      method,
-      url,
-      data,
-      headers,
-    });
+    const response = await axios({ method, url, data, headers });
     return response.data;
   } catch (error) {
+    // Return the full server error response so callers can inspect error.code etc.
+    if (error?.response?.data) {
+      return error.response.data;
+    }
     return {
       status: "error",
-      message: error?.response?.data?.error || error.message,
+      message: error.message,
     };
   }
 };
@@ -80,7 +79,7 @@ export const getTransactions = async () => {
 export const getTransactionsByID = async (_id) => {
   let token = getJWTtoken();
   const obj = {
-    method: "post",
+    method: "get",
     url: transactionEP + "/" + _id,
     headers: {
       Authorization: `Bearer ${token}`,
@@ -138,7 +137,6 @@ export const updateTransaction = async (id, transactionData)=>{
   }
 }
 export const verifyEmail = async (token) => {
-  console.log("axios line 141 inside verfiyemail", token,import.meta.env.VITE_BACKEND_URL)
   const obj = {
     method: "GET",
     url: `${import.meta.env.VITE_API_URL}/auth/useremailverification/${token}`,
