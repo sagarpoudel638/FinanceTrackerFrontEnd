@@ -32,6 +32,7 @@ const Dashboard = () => {
   const [suggestions, setSuggestions] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [suggestionsFetched, setSuggestionsFetched] = useState(false);
 
   const fillDashboard = async () => {
     try {
@@ -43,6 +44,7 @@ const Dashboard = () => {
       } else {
         setTransactions(response.data);
         setError("");
+        setSuggestionsFetched(false); // reset cache when transactions reload
       }
     } catch (error) {
       setError("Failed to fetch transactions.");
@@ -57,11 +59,17 @@ const Dashboard = () => {
   }, []);
 
   const totals = useMemo(() => calculateTotals(transactions), [transactions]);
-  const fetchSuggestions = async () => {
+  const fetchSuggestions = async (forceRefresh = false) => {
+    // Use cached result if available and not forcing a refresh
+    if (suggestionsFetched && !forceRefresh) {
+      setShowModal(true);
+      return;
+    }
     setLoadingSuggestions(true);
     try {
       const response = await getSuggestions();
       setSuggestions(response?.suggestion || "Could not generate suggestions. Please try again.");
+      setSuggestionsFetched(true);
     } catch (error) {
       setSuggestions("Error retrieving AI suggestions. Please try again.");
     } finally {
@@ -174,12 +182,22 @@ const Dashboard = () => {
                 <div className="modal-body" style={{ whiteSpace: "pre-line" }}>
                   {suggestions}
                 </div>
-                <button
-                  className="suggestion-button"
-                  onClick={() => setShowModal(false)}
-                >
-                  Got It!
-                </button>
+                <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
+                  <button
+                    className="suggestion-button"
+                    onClick={() => fetchSuggestions(true)}
+                    disabled={loadingSuggestions}
+                    style={{ backgroundColor: "#636e72" }}
+                  >
+                    {loadingSuggestions ? "Refreshing..." : "Refresh"}
+                  </button>
+                  <button
+                    className="suggestion-button"
+                    onClick={() => setShowModal(false)}
+                  >
+                    Got It!
+                  </button>
+                </div>
               </div>
             </div>
           )}
