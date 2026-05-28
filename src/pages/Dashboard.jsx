@@ -174,7 +174,7 @@ const Dashboard = () => {
           </button>
 
           {showModal && (
-            <div className="modal">
+            <div className="modal" style={{ display: "block" }}>
               <div className="modal-content">
                 <button
                   className="close-button"
