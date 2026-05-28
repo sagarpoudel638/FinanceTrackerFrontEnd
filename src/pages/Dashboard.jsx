@@ -68,8 +68,12 @@ const Dashboard = () => {
     setLoadingSuggestions(true);
     try {
       const response = await getSuggestions();
-      setSuggestions(response?.suggestion || "Could not generate suggestions. Please try again.");
-      setSuggestionsFetched(true);
+      const text = response?.suggestion || "Could not generate suggestions. Please try again.";
+      setSuggestions(text);
+      // Only cache if it's a real suggestion, not an error message
+      if (response?.suggestion && !response?.message) {
+        setSuggestionsFetched(true);
+      }
     } catch (error) {
       setSuggestions("Error retrieving AI suggestions. Please try again.");
     } finally {
